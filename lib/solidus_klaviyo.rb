@@ -2,6 +2,7 @@
 
 require 'httparty'
 require 'klaviyo'
+require 'klaviyo-api-sdk'
 require 'solidus_core'
 require 'solidus_support'
 require 'solidus_tracking'
@@ -54,3 +55,4 @@ module SolidusKlaviyo
     end
   end
 end
+
