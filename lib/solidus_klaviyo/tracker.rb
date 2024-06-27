@@ -9,19 +9,48 @@ module SolidusKlaviyo
     end
 
     def track(event)
-      klaviyo.track(
-        event.name,
-        email: event.email,
-        customer_properties: event.customer_properties,
-        properties: event.properties,
-        time: event.time,
-      )
+      KlaviyoAPI::Events.create_event(body(event), auth)
     end
 
     private
 
-    def klaviyo
-      @klaviyo ||= Klaviyo::Client.new(options.fetch(:api_key))
+    def body(event)
+      {
+        "data": {
+          "type": "event",
+          "attributes": {
+            "properties": event.properties,
+            "time": event.time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "value": event.properties['$value'],
+            "value_currency": "USD",
+            "metric": {
+              "data": {
+                "type": "metric",
+                "attributes": {
+                  "name": event.name
+                }
+              }
+            },
+            "profile": {
+              "data": {
+                "type": "profile",
+                "attributes": {
+                  "email": event.email
+                }
+              }
+            }
+          }
+        }
+      }
+    end
+
+    def auth
+      { :header_params=>
+          {"Authorization" => "Klaviyo-API-Key #{SolidusKlaviyo.configuration.api_key}",
+           "revision" => "2024-06-15",
+           "Accept"=>"application/json",
+           "Content-Type"=>"application/json" },
+        :debug_auth_names=>[]}
     end
   end
 end
